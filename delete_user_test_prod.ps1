@@ -43,16 +43,10 @@ $NameToFind = $(Write-Host ">> Please, enter username to delete folders" -Foregr
 # # * Getting the folders from the file system
 
 # ! At server
-$HomesFolderForUser = Get-ChildItem -Path E:\Homes -Directory -Filter "$NameToFind.MOANICKEL"
-$FRFolderForUser = Get-ChildItem -Path E:\FR -Directory -Filter "$NameToFind"
-$ProfiliaFolderForUser = Get-ChildItem -Path E:\Profilia -Directory -Filter "$NameToFind.MOANICKEL.V2"
-$OTROSUsuariosFolderForUser = Get-ChildItem -Path E:\OTROS\Usuarios -Directory -Filter "$NameToFind"
-
-# ! Locally
-# $HomesFolderForUser = Get-ChildItem -Path D:\PowerShellTESTS\Homes -Directory -Filter "$NameToFind.MOANICKEL"
-# $FRFolderForUser = Get-ChildItem -Path D:\PowerShellTESTS\FR -Directory -Filter "$NameToFind"
-# $ProfiliaFolderForUser = Get-ChildItem -Path D:\PowerShellTESTS\Profilia -Directory -Filter "$NameToFind.MOANICKEL.V2"
-# $OTROSUsuariosFolderForUser = Get-ChildItem -Path D:\PowerShellTESTS\OTROS\Usuarios -Directory -Filter "$NameToFind"
+$HomesFolderForUser = Get-ChildItem -Path E:\Semoh -Directory -Filter "$NameToFind.MNKL"
+$FRFolderForUser = Get-ChildItem -Path E:\RF -Directory -Filter "$NameToFind"
+$ProfiliaFolderForUser = Get-ChildItem -Path E:\Ailifrop -Directory -Filter "$NameToFind.MNKL.V2"
+$OTROSUsuariosFolderForUser = Get-ChildItem -Path E:\SORTO\Soirausu -Directory -Filter "$NameToFind"
 
 # * Structure with folders from the file system
 $PathsArray = @($HomesFolderForUser, $FRFolderForUser, $ProfiliaFolderForUser, $OTROSUsuariosFolderForUser)
