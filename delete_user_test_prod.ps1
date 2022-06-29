@@ -24,205 +24,132 @@ function TestPathAndAddPath([Array[]]$PathsArray) {
     return $ExistentList
 }
 
-# * Tests every path in the $PathsArray array, and if it exists, 
-# function TestPathAndAddPath([Array[]]$PathsArray) {
-#     $ExistentList = [System.Collections.ArrayList]::new()
-#     $NonExistentList = [System.Collections.ArrayList]::new()
-    
-#     foreach ($currentItemName in $PathsArray) {
-#         try {
-#             if (Test-Path -Path $currentItemName.FullName) {
-#                 [void]$ExistentList.Add($currentItemName.FullName)
-#             }
-#         }
-#         catch {
-#             # * ...useless catch 😃
-#             [void]$NonExistentList.Add($currentItemName.FullName)
-#         }
-#     }
-
-#     $HashList = @{existence = $ExistentList; non_existent = $NonExistentList}
-
-#     return $HashList
-# }
-
 # temporarily overwrite Out-Default
 function Out-Default {}
 
 # * Clear the all inputs
 Clear-Host
 
-$Title = "Eliminar carpetas de usuario - Moa Nickel S.A. - Grupo de Redes"
+$Title = "Eliminar carpetas de usuario - Grupo de Redes"
 $host.UI.RawUI.WindowTitle = $Title
 
-# try {
+Write-Host
+Write-Host "--- [ RUNNING POWERSHELL SCRIPT TO DELETE USER'S FOLDER ] ---" -Foreground Black -Background Green
+Write-Host
+
+# * Conform folder name of the user
+$NameToFind = $(Write-Host ">> Please, enter username to delete folders" -Foreground Green) + $(Write-Host "<< Username: " -ForegroundColor Yellow -NoNewLine; Read-Host)
+
+# # * Getting the folders from the file system
+
+# ! At server
+$HomesFolderForUser = Get-ChildItem -Path E:\Homes -Directory -Filter "$NameToFind.MOANICKEL"
+$FRFolderForUser = Get-ChildItem -Path E:\FR -Directory -Filter "$NameToFind"
+$ProfiliaFolderForUser = Get-ChildItem -Path E:\Profilia -Directory -Filter "$NameToFind.MOANICKEL.V2"
+$OTROSUsuariosFolderForUser = Get-ChildItem -Path E:\OTROS\Usuarios -Directory -Filter "$NameToFind"
+
+# ! Locally
+# $HomesFolderForUser = Get-ChildItem -Path D:\PowerShellTESTS\Homes -Directory -Filter "$NameToFind.MOANICKEL"
+# $FRFolderForUser = Get-ChildItem -Path D:\PowerShellTESTS\FR -Directory -Filter "$NameToFind"
+# $ProfiliaFolderForUser = Get-ChildItem -Path D:\PowerShellTESTS\Profilia -Directory -Filter "$NameToFind.MOANICKEL.V2"
+# $OTROSUsuariosFolderForUser = Get-ChildItem -Path D:\PowerShellTESTS\OTROS\Usuarios -Directory -Filter "$NameToFind"
+
+# * Structure with folders from the file system
+$PathsArray = @($HomesFolderForUser, $FRFolderForUser, $ProfiliaFolderForUser, $OTROSUsuariosFolderForUser)
+
+# * Run my function (it is at the top of this script)
+# $PathsFullNameArrayList = TestPathAndAddPath $PathsArray
+# [ STRING VERSION ]
+$PathsFullNameString = TestPathAndAddPath $PathsArray
+$PathsFullNameString = $PathsFullNameString.TrimStart("=")
+
+# [ STRING VERSION ]
+$ExistentPaths = $PathsFullNameString.Split("=")
+
+# * Get the name of the computer
+$PCName = [System.Net.Dns]::GetHostName()
+
+# Write-Host "Count of paths: $($ExistentPaths.count) .. GT 0? $($ExistentPaths.count -gt 0)"
+
+# if ($ExistentPaths.count -gt 0) {
+if ($ExistentPaths -notlike '') {
     Write-Host
-    Write-Host "--- [ RUNNING POWERSHELL SCRIPT TO DELETE USER'S FOLDER ] ---" -Foreground Black -Background Green
-    Write-Host
+    Write-Host ">> The following folders were found:" -Foreground Green
 
-    # * Conform folder name of the user
-    $NameToFind = $(Write-Host ">> Please, enter username to delete folders" -Foreground Green) + $(Write-Host "<< Username: " -ForegroundColor Yellow -NoNewLine; Read-Host)
+    # Write-Host "ExistentPaths: -$ExistentPaths-"
+    foreach ($currentItemName in $ExistentPaths) {
+        Write-Host ">>       + $currentItemName" -Foreground Yellow
+    }
 
-    # $NameToFind = $NameToFind
+    # * New Line
+    Write-Host          
 
-    # * User folders ubications
-    # $UserFolders = @("$NameToFind.MOANICKEL", "$NameToFind", "$NameToFind.MOANICKEL.V2", "$NameToFind")
-    # $UserFolders = @("$NameToFind.MOANICKEL", "$NameToFind", "$NameToFind.MOANICKEL.V2", "$NameToFind")
-    
-    # Write-Host "User Folders: $UserFolders"
-    
-    # * Locations where script must find user's folders
-    # $Locations = @("E:\Homes", "E:\FR", "E:\Profilia", "E:\OTROS\Usuarios")
-    # $Locations = @('D:\PowerShellTESTS\Homes', 'D:\PowerShellTESTS\FR', 'D:\PowerShellTESTS\Profilia', 'D:\PowerShellTESTS\OTROS\Usuarios')
-    
-    # Write-Host "Locations: $Locations"
+    # * Empty variable
+    $answer = ""        
 
-    # * String Folders for user to test existence
-    # $HomesFolderForUserString = "D:\PowerShellTESTS\Homes\$NameToFind.MOANICKEL"
-    # $FRFolderForUserString = "D:\PowerShellTESTS\FR\$NameToFind"
-    # $ProfiliaFolderForUserString = "D:\PowerShellTESTS\Profilia\$NameToFind.MOANICKEL.V2"
-    # $OTROSUsuariosFolderForUserString = "D:\PowerShellTESTS\OTROS\Usuarios\$NameToFind"
+    while ("yes", "no", "y", "n" -notcontains $answer) {
+        $answer = $(Write-Host " >> Proceed with DELETE action? Type [Y]es or [N]o  " -Foreground Black -Background Red) + $(Write-Host "<< " -ForegroundColor Green -NoNewLine; Read-Host)
+    }
 
-    # * Structure with COMPLETE string locations
-    # $PathsToFoldersString = @($HomesFolderForUserString, $FRFolderForUserString, $ProfiliaFolderForUserString, $OTROSUsuariosFolderForUserString)
-
-    # $ListF = TestPathCustom($PathsToFoldersString)
-    # Write-Host "List of folders: $($ListF.count)"
-    # Write-Host "List of folders: $ListF"
-
-    # # * Getting the folders from the file system
-
-    # ! At server
-    $HomesFolderForUser = Get-ChildItem -Path E:\Homes -Directory -Filter "$NameToFind.MOANICKEL"
-    $FRFolderForUser = Get-ChildItem -Path E:\FR -Directory -Filter "$NameToFind"
-    $ProfiliaFolderForUser = Get-ChildItem -Path E:\Profilia -Directory -Filter "$NameToFind.MOANICKEL.V2"
-    $OTROSUsuariosFolderForUser = Get-ChildItem -Path E:\OTROS\Usuarios -Directory -Filter "$NameToFind"
-    
-    # ! Locally
-    # $HomesFolderForUser = Get-ChildItem -Path D:\PowerShellTESTS\Homes -Directory -Filter "$NameToFind.MOANICKEL"
-    # $FRFolderForUser = Get-ChildItem -Path D:\PowerShellTESTS\FR -Directory -Filter "$NameToFind"
-    # $ProfiliaFolderForUser = Get-ChildItem -Path D:\PowerShellTESTS\Profilia -Directory -Filter "$NameToFind.MOANICKEL.V2"
-    # $OTROSUsuariosFolderForUser = Get-ChildItem -Path D:\PowerShellTESTS\OTROS\Usuarios -Directory -Filter "$NameToFind"
-
-    # * Structure with folders from the file system
-    $PathsArray = @($HomesFolderForUser, $FRFolderForUser, $ProfiliaFolderForUser, $OTROSUsuariosFolderForUser)
-
-    # * Run my function (it is at the top of this script)
-    # $PathsFullNameArrayList = TestPathAndAddPath $PathsArray
-    # [ STRING VERSION ]
-    $PathsFullNameString = TestPathAndAddPath $PathsArray
-    $PathsFullNameString = $PathsFullNameString.TrimStart("=")
-
-    # * Existent paths are in the first position of returned structure
-    # Write-Host "From array $($PathsFullNameArrayList["existence"])"
-    # Write-Host "From array $($PathsFullNameArrayList["non_existence"])"
-
-    # $ExistentPaths = $PathsFullNameArrayList["existence"]
-    # [ STRING VERSION ]
-    $ExistentPaths = $PathsFullNameString.Split("=")
-    # Write-Host "Paths: -$ExistentPaths-"
-
-    # ! Non-existent paths are in the second position of returned structure (... and still I don´t know what to do with it)
-    # $NonExistentPaths = $PathsFullNameArrayList[1]
-
-    # * Get the name of the computer
-    $PCName = [System.Net.Dns]::GetHostName()
-    
-    # Write-Host "Count of paths: $($ExistentPaths.count) .. GT 0? $($ExistentPaths.count -gt 0)"
-    
-    # if ($ExistentPaths.count -gt 0) {
-    if ($ExistentPaths -notlike '') {
+    if ($answer -eq "y" -or $answer -eq "yes") {
+        Write-Host ">> $answer PRESSED. Proceeding with " -NoNewLine -Foreground Green
+        Write-Host "DELETE action" -Foreground Red
         Write-Host
-        Write-Host ">> The following folders were found:" -Foreground Green
-        
-        # Write-Host "ExistentPaths: -$ExistentPaths-"
-        foreach ($currentItemName in $ExistentPaths) {
-            Write-Host ">>       + $currentItemName" -Foreground Yellow
+
+        $(Write-Host ">> This action will " -ForegroundColor Yellow -NoNewline) 
+        $(Write-Host "DELETE" -ForegroundColor Red -NoNewline) 
+        $(Write-Host " permanently all folders of user [ $NameToFind ] in $PCName server. " -ForegroundColor Yellow)
+        Write-Host
+
+        $ConfirmAnswer = ""
+        while ("yes", "no", "y", "n" -notcontains $ConfirmAnswer) {
+            $(Write-Host " >> Are you completely sure? (Y/N) " -ForegroundColor Black -BackgroundColor Red)
+            $ConfirmAnswer = $(Write-Host "<< " -ForegroundColor Green -NoNewline; Read-Host)
         }
 
-        # * New Line
-        Write-Host          
 
-        # * Empty variable
-        $answer = ""        
-    
-        while ("yes", "no", "y", "n" -notcontains $answer) {
-            $answer = $(Write-Host " >> Proceed with DELETE action? Type [Y]es or [N]o  " -Foreground Black -Background Red) + $(Write-Host "<< " -ForegroundColor Green -NoNewLine; Read-Host)
+        if ($ConfirmAnswer -eq "N") {
+            Write-Host "<< $ConfirmAnswer PRESSED. Delete action will NOT be performed" -ForegroundColor Green
+            Write-Host
         }
-
-        if ($answer -eq "y" -or $answer -eq "yes") {
-            Write-Host ">> $answer PRESSED. Proceeding with " -NoNewLine -Foreground Green
-            Write-Host "DELETE action" -Foreground Red
+        elseif ($ConfirmAnswer -eq "Y") {
+            Write-Host ">> $ConfirmAnswer PRESSED. Completing delete action." -ForegroundColor Yellow
             Write-Host
 
-            $(Write-Host ">> This action will " -ForegroundColor Yellow -NoNewline) 
-            $(Write-Host "DELETE" -ForegroundColor Red -NoNewline) 
-            $(Write-Host " permanently all folders of user [ $NameToFind ] in $PCName server. " -ForegroundColor Yellow)
+            # * THE LINES THAT DELETES THE FOLDERS -xxxxxxxxx- IN $HomesFullName
+            foreach ($currentPath in $ExistentPaths) {
+                Write-Host ">> Removing $currentPath..." -ForegroundColor Yellow -NoNewline
+                Remove-Item -LiteralPath "$currentPath" -Force -Recurse
+                # Write-Host " (FAKE)" -ForegroundColor Red -NoNewLine
+                Write-Host " DONE!" -ForegroundColor Green
+            }
+
             Write-Host
-
-            $ConfirmAnswer = ""
-            while ("yes", "no", "y", "n" -notcontains $ConfirmAnswer) {
-                $(Write-Host " >> Are you completely sure? (Y/N) " -ForegroundColor Black -BackgroundColor Red)
-                $ConfirmAnswer = $(Write-Host "<< " -ForegroundColor Green -NoNewline; Read-Host)
-            }
-
-
-            if ($ConfirmAnswer -eq "N") {
-                Write-Host "<< $ConfirmAnswer PRESSED. Delete action will NOT be performed" -ForegroundColor Green
-                Write-Host
-            }
-            elseif ($ConfirmAnswer -eq "Y") {
-                Write-Host ">> $ConfirmAnswer PRESSED. Completing delete action." -ForegroundColor Yellow
-                Write-Host
-    
-                # * THE LINES THAT DELETES THE FOLDERS -xxxxxxxxx- IN $HomesFullName
-                foreach ($currentPath in $ExistentPaths) {
-                    Write-Host ">> Removing $currentPath..." -ForegroundColor Yellow -NoNewline
-                    Remove-Item -LiteralPath "$currentPath" -Force -Recurse
-                    # Write-Host " (FAKE)" -ForegroundColor Red -NoNewLine
-                    Write-Host " DONE!" -ForegroundColor Green
-                }
-
-                Write-Host
-                Write-Host ">> Folders for user [ $NameToFind ] were successfully removed" -ForegroundColor Green
-                Write-Host
-            }
-        }
-        else {
-            Write-Host ">> $Answer PRESSED" -Foreground Yellow
+            Write-Host ">> Folders for user [ $NameToFind ] were successfully removed" -ForegroundColor Green
+            Write-Host
         }
     }
     else {
-        $EmojiIcon = [System.Convert]::toInt32("1F61E", 16)
-        # $EmojiIconType = $EmojiIcon.GetType() 
-        $Emoji = [System.Char]::ConvertFromUtf32($EmojiIcon)
-
-        Write-Host
-        Write-Host ">> No folder for user [ $NameToFind ] was found $Emoji... Are you sure you have the right user?" -Foreground Green
-        Write-Host
+        Write-Host ">> $Answer PRESSED" -Foreground Yellow
     }
-# }
-# catch {
-#     Write-Host
-#     Write-Host ">> --------------------------------------------------" -ForegroundColor Red
-#     Write-Host ">>              Some errors ocurred..."   -ForegroundColor Red
-#     Write-Host ">>      Contact to cvelazquez@moanickel.com.cu"   -ForegroundColor Red
-#     Write-Host ">> --------------------------------------------------" -ForegroundColor Red
-#     Write-Host
-    
-#     Write-Host ">>  Stack trace:" -Foreground Green
-#     Write-Host ">>      $($PSItem.Exception.StackTrace)" -Foreground Red
-#     Write-Host
-# }
-# finally {
-    # Write-Host
-    Write-Host "--- [ EXITING SCRIPT ] ---" -Foreground Black -Background Green
+}
+else {
+    $EmojiIcon = [System.Convert]::toInt32("1F61E", 16)
+    # $EmojiIconType = $EmojiIcon.GetType() 
+    $Emoji = [System.Char]::ConvertFromUtf32($EmojiIcon)
+
     Write-Host
-    
-    Pause
-    
-    Clear-Host
-    # restore Out-Default
-    Remove-Item -Path function:Out-Default
-    exit
-# }
+    Write-Host ">> No folder for user [ $NameToFind ] was found $Emoji... Are you sure you have the right user?" -Foreground Green
+    Write-Host
+}
+
+# Write-Host
+Write-Host "--- [ EXITING SCRIPT ] ---" -Foreground Black -Background Green
+Write-Host
+
+Pause
+
+Clear-Host
+# restore Out-Default
+Remove-Item -Path function:Out-Default
+exit
